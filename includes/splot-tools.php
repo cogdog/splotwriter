@@ -124,3 +124,9 @@ function splotwriter_get_licences() {
 				);
 }
 
+function set_html_content_type() {
+	// from http://codex.wordpress.org/Function_Reference/wp_mail
+	return 'text/html';
+}
+
+
