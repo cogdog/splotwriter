@@ -5,9 +5,13 @@
    http://mikejolley.com/2012/12/using-the-new-wordpress-3-5-media-uploader-in-plugins/
   
 */
-
 	
 jQuery(document).ready(function() { 
+
+	// enable tag autocomplete using suggest
+	// writerObject is passed from WordPress localize script hook
+	jQuery('#wTags').suggest( writerObject.splotURL + "/wp-admin/admin-ajax.php?action=ajax-tag-search&tax=post_tag", {multiple:true, multipleSep: ","});
+
 
 	// called for via click of upload button for adding media
 	jQuery(document).on('click', '.upload_image_button', function(e){
@@ -48,11 +52,5 @@ jQuery(document).ready(function() {
 		// Finally, open the modal
 		file_frame.open();
 	
-	});
-	
-	// enable tag autocomplete using suggest
-	// writerObject is passed from WordPress localize script hook
-	jQuery('#wTags').suggest( writerObject.siteURL + "/wp-admin/admin-ajax.php?action=ajax-tag-search&tax=post_tag", {multiple:true, multipleSep: ","});
-
-	
+	});	
 });

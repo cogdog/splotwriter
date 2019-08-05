@@ -101,16 +101,18 @@ class Splotwriter_Public {
 			wp_enqueue_script( 'suggest' );
 		
 			// custom jquery for the uploader on the form
-			wp_enqueue_script( $this->plugin_name , plugin_dir_url( __FILE__ ) . 'js/jquery.writer.js', array( 'jquery' ), $this->version, true );	
+			wp_register_script( 'jquery.writer' , plugin_dir_url( __FILE__ ) . 'js/jquery.writer.js', array( 'jquery', 'suggest' ), $this->version, true );	
 			
 			// add a local variable for the site's home url
 			wp_localize_script(
-			  $this->plugin_name,
+			  'jquery.writer',
 			  'writerObject',
 			  array(
-				'siteUrl' => esc_url(home_url())
+				'splotURL' => esc_url(home_url())
 			  )
 			);
+			
+			wp_enqueue_script( 'jquery.writer' );
 		
 			// add scripts for fancybox (used for help) 
 			//-- h/t http://code.tutsplus.com/tutorials/add-a-responsive-lightbox-to-your-wordpress-theme--wp-28100
@@ -603,12 +605,12 @@ class Splotwriter_Public {
 				if ( $wNotes_required == 1  AND $wNotes == '' ) $errors[] = '<strong>Extra Information Missing</strong> - please provide the requested extra information.';
 				
 				// test for email only if enabled in options
-				if ( !empty( splotwriter_option('email_domains') ) )  {
+				if ( !empty( splotwriter_option('show_email') ) )  {
 				
 					// check first for valid email address
-					if ( $this->is_email( $wEmail ) ) {
+					if ( is_email( $wEmail ) ) {
 						// if email is good then check if we are limiting to domains
-						if ( !$this->splotwriter_allowed_email_domain( $wEmail )  ) {
+						if ( !empty(splotwriter_option('email_domains'))  AND !$this->splotwriter_allowed_email_domain( $wEmail )  ) {
 							$errors[] = '<strong>Email Address Not Allowed</strong> - The email address you entered <code>' . $wEmail . '</code> is not from an domain accepted in this site. This site requests that  addresses are ones with domains <code>' .  splotwriter_option('email_domains') . '</code>. ';
 						}
 				
@@ -2039,11 +2041,6 @@ class Splotwriter_Public {
 		} else {
 			return false;
 		}
-	}
-
-
-	public function is_email( $email ) {
-		return filter_var($email, FILTER_VALIDATE_EMAIL);
 	}
 
 	public function splotwriter_get_reading_time( $prefix_string, $suffix_string ) {
