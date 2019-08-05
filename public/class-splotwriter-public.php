@@ -322,7 +322,7 @@ class Splotwriter_Public {
 
 	
 			// show the request edit link button if they have provided an email and post is published
-			if ( !splotwriter_option('show_email') == 1  and get_post_meta( $post->ID, 'wEmail', 1 ) and get_post_status() == 'publish' ) {
+			if ( splotwriter_option('show_email') == 1  and get_post_meta( $post->ID, 'wEmail', 1 ) and get_post_status() == 'publish' ) {
 				$postcontent .= '<li><span class="metalabel">Edit Link:</span> <em>(emailed to author)</em> <a href="#" id="getEditLink" class="pretty-button pretty-button-blue" data-widurl="' . get_bloginfo('url') . '/get-edit-link/' .   $post->ID . '">Request Now</a> <span id="getEditLinkResponse" class="writenew"></span></li>';
 			}
 							
@@ -2092,8 +2092,6 @@ class Splotwriter_Public {
 		}
 		
 		return false;
-	
-	
 	}
 
 	public function splot_the_author() {
