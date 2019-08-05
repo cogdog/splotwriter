@@ -117,14 +117,6 @@ class Splotwriter_Admin {
 	
 	}
 
-
-// load theme options Settings
-	public function splotwriter_load_theme_options() {	
-		// class for adding admin options
-		require plugin_dir_path( __FILE__ ) . 'class-splotwriter-options.php';
-	}
-
-
 	public function splotwriter_options_to_admin() {
 	// put the options on the menu and top stage
 		global $wp_admin_bar;

@@ -34,3 +34,4 @@ On activation, the plugin *should* create two Pages in your site; one acts as th
 ## Changes
 
 * v1.1.0 Just got it working! It's beta, baby
+* v1.2.0 Minor fixes, new options to enable/hide email entry form plus allow limiting use of emails by domain

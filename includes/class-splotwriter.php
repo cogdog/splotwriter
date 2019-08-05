@@ -154,7 +154,6 @@ class Splotwriter {
 
 		$plugin_admin = new Splotwriter_Admin( $this->get_plugin_name(), $this->get_version() );
 		$this->loader->add_action( 'admin_enqueue_scripts', $plugin_admin, 'enqueue_scripts' );
-		$this->loader->add_action( 'after_setup_theme', $plugin_admin, 'splotwriter_load_theme_options', 9 );
 		$this->loader->add_action( 'init', $plugin_admin, 'splotwriter_change_post_object' );
 		$this->loader->add_action( 'admin_menu', $plugin_admin, 'splotwriter_change_label' );
 		$this->loader->add_action( 'wp_before_admin_bar_render', $plugin_admin, 'splotwriter_options_to_admin' );
@@ -176,12 +175,12 @@ class Splotwriter {
 		$this->loader->add_action( 'wp_enqueue_scripts', $plugin_public, 'enqueue_styles' );
 		$this->loader->add_action( 'wp_enqueue_scripts', $plugin_public, 'enqueue_scripts' );
 		
-		$this->loader->add_action( 'after_switch_theme', $plugin_public, 'splotwriter_rewrite_rules' );
 		$this->loader->add_action( 'init', $plugin_public, 'splotwriter_rewrite_rules' );
 		$this->loader->add_action( 'init', $plugin_public, 'register_shortcodes' );
 		$this->loader->add_action( 'customize_register', $plugin_public, 'splotwriter_register_theme_customizer' );
 
 		$this->loader->add_action( 'after_setup_theme', $plugin_public, 'splot_remove_admin_bar' );
+		$this->loader->add_action( 'after_setup_theme', $plugin_public, 'splotwriter_load_theme_options', 9 );
 		$this->loader->add_action( 'query_vars', $plugin_public, 'splotwriter_queryvars' );	
 		$this->loader->add_action( 'template_redirect', $plugin_public, 'splotwriter_write_director' );
 		$this->loader->add_action( 'rest_api_init', $plugin_public, 'splotwriter_create_api_posts_meta_field' );

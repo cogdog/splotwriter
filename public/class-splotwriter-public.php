@@ -126,6 +126,13 @@ class Splotwriter_Public {
 			wp_enqueue_script( $this->plugin_name, plugin_dir_url( __FILE__ ) . 'js/jquery.editlink.js', null, $this->version, TRUE ); 
 		}		
 	}
+
+// load theme options Settings
+	public function splotwriter_load_theme_options() {	
+		// class for adding admin options
+		require plugin_dir_path( __FILE__ ) . 'class-splotwriter-options.php';
+	}
+
 	
 	public function splotwriter_rewrite_rules() {
 		// rewrite rules for sending to random item
@@ -315,7 +322,7 @@ class Splotwriter_Public {
 
 	
 			// show the request edit link button if they have provided an email and post is published
-			if ( get_post_meta( $post->ID, 'wEmail', 1 ) and get_post_status() == 'publish' ) {
+			if ( !splotwriter_option('show_email') == 1  and get_post_meta( $post->ID, 'wEmail', 1 ) and get_post_status() == 'publish' ) {
 				$postcontent .= '<li><span class="metalabel">Edit Link:</span> <em>(emailed to author)</em> <a href="#" id="getEditLink" class="pretty-button pretty-button-blue" data-widurl="' . get_bloginfo('url') . '/get-edit-link/' .   $post->ID . '">Request Now</a> <span id="getEditLinkResponse" class="writenew"></span></li>';
 			}
 							
@@ -441,11 +448,11 @@ class Splotwriter_Public {
 						<fieldset>
 							<label for="wAccess">' . __('Access Code', 'splotwriter' ) . '</label><br />
 							<p>Enter a proper code</p>
-							<input type="text" name="wAccess" id="wAccess" class="required" value="' . $wAccess . '" tabindex="1" />
+							<input type="text" name="wAccess" id="wAccess" class="required" value="' . $wAccess . '" />
 						</fieldset>	
 		
 						<fieldset>' . wp_nonce_field( 'splotwriter_form_access', 'splotwriter_form_access_submitted' ) . '
-							<input type="submit" class="pretty-button pretty-button-blue" value="Check Code" id="checkit" name="checkit" tabindex="15">
+							<input type="submit" class="pretty-button pretty-button-blue" value="Check Code" id="checkit" name="checkit">
 						</fieldset>
 				</form>';
 	
@@ -594,6 +601,25 @@ class Splotwriter_Public {
 				if ( $wHeaderImageCaption == '' ) $errors[] = '<strong>Header Image Caption Missing</strong> - please provide a description or a credit for your header image. We would like to assume it is your own image or one that is licensed for re-use.'; 
 		
 				if ( $wNotes_required == 1  AND $wNotes == '' ) $errors[] = '<strong>Extra Information Missing</strong> - please provide the requested extra information.';
+				
+				// test for email only if enabled in options
+				if ( !empty( splotwriter_option('email_domains') ) )  {
+				
+					// check first for valid email address
+					if ( $this->is_email( $wEmail ) ) {
+						// if email is good then check if we are limiting to domains
+						if ( !$this->splotwriter_allowed_email_domain( $wEmail )  ) {
+							$errors[] = '<strong>Email Address Not Allowed</strong> - The email address you entered <code>' . $wEmail . '</code> is not from an domain accepted in this site. This site requests that  addresses are ones with domains <code>' .  splotwriter_option('email_domains') . '</code>. ';
+						}
+				
+					} else {
+						// bad email, sam.
+						$errors[] = '<strong>Invalid Email Address</strong> - the email address entered <code>' . $wEmail . '</code> is not a valid address. Pleae check and try again.';
+					}
+				}
+				
+				
+				
 		
 				if ( count($errors) > 0 ) {
 					// form errors, build feedback string to display the errors
@@ -868,14 +894,14 @@ class Splotwriter_Public {
 					<fieldset id="theTitle">
 						<label for="wTitle">' . $this->splotwriter_form_item_title()  . '</label><br />
 						<p>'  . $this->splotwriter_form_item_title_prompt() . '</p>
-						<input type="text" name="wTitle" id="wTitle" class="required writerfield" value="' .  $wTitle  . '" tabindex="1" />
+						<input type="text" name="wTitle" id="wTitle" class="required writerfield" value="' .  $wTitle  . '" />
 					</fieldset>	
 		
 
 					<fieldset id="theAuthor">
 						<label for="wAuthor">' . $this->splotwriter_form_item_byline()  . '</label><br />
 						<p> ' . $this->splotwriter_form_item_byline_prompt() . '</p>
-						<input type="text" name="wAuthor" id="wAuthor" class="required writerfield" value="' .  $wAuthor  . '" tabindex="2" />
+						<input type="text" name="wAuthor" id="wAuthor" class="required writerfield" value="' .  $wAuthor  . '"  />
 					</fieldset>	
 			
 					<fieldset id="theText">
@@ -889,7 +915,6 @@ class Splotwriter_Public {
 							$settings = array( 
 								'textarea_name' => 'wText', 
 								'editor_height' => '400', 
-								'tabindex'  => "3", 
 								'drag_drop_upload' => true, 
 							);
 						
@@ -904,7 +929,7 @@ class Splotwriter_Public {
 						$output .= '<fieldset id="theFooter">
 								<label for="wFooter">' . $this->splotwriter_form_item_footer() . '</label>						
 								<p>' . $this->splotwriter_form_item_footer_prompt() . '</p>
-								<textarea name="wFooter" id="wFooter" class="writerfield" rows="15"  tabindex="4">' .  stripslashes( $wFooter ) . '</textarea>
+								<textarea name="wFooter" id="wFooter" class="writerfield" rows="15">' .  stripslashes( $wFooter ) . '</textarea>
 						</fieldset>';
 					}
 			
@@ -918,21 +943,21 @@ class Splotwriter_Public {
 								$defthumb = wp_get_attachment_image_src( $wHeaderImage_id, 'thumbnail' );
 							} else {
 								$defthumb = [];
-								$defthumb[] = get_stylesheet_directory_uri() . '/images/default-header-thumb.jpg';
+								$defthumb[] = plugin_dir_url( __FILE__ ) . '/images/default-header-thumb.jpg';
 								$wHeaderImageCaption = 'flickr photo by Lívia Cristina https://flickr.com/photos/liviacristinalc/3402221680 shared under a Creative Commons (BY-NC-ND) license';
 							}
 					
 				
 							$output .=  '<img src="' .  $defthumb[0] . '" alt="article banner image" id="headerthumb" /><br />
 				
-							<input type="button" id="wHeaderImage_button"  class="btn btn-success btn-medium  upload_image_button" name="_wImage_button"  data-uploader_title="Set Header Image" data-uploader_button_text="Select Image" value="Set Header Image" tabindex="5" />	
+							<input type="button" id="wHeaderImage_button"  class="btn btn-success btn-medium  upload_image_button" name="_wImage_button"  data-uploader_title="Set Header Image" data-uploader_button_text="Select Image" value="Set Header Image" />	
 							</div>
 					
 							<p>' . $this->splotwriter_form_item_header_image_prompt() . '<br clear="left"></p>
 					
 							<label for="wHeaderImageCaption">' . $this->splotwriter_form_item_header_caption() . '</label>
 							<p>' . $this->splotwriter_form_item_header_caption_prompt() . '</p>
-							<input type="text" name="wHeaderImageCaption" class="writerfield" id="wHeaderImageCaption" value="' .  htmlentities( stripslashes( $wHeaderImageCaption ), ENT_QUOTES) .'" tabindex="6" />
+							<input type="text" name="wHeaderImageCaption" class="writerfield" id="wHeaderImageCaption" value="' .  htmlentities( stripslashes( $wHeaderImageCaption ), ENT_QUOTES) .'"  />
 			
 					</fieldset>';				
 			
@@ -955,7 +980,7 @@ class Splotwriter_Public {
 				
 								$checked = ( in_array( $acat->term_id, $wCats) ) ? ' checked="checked"' : '';
 					
-								$output .= '<br /><input type="checkbox" name="wCats[]" tabindex="7" value="' . $acat->term_id . '"' . $checked . '> ' . $acat->name . ' <em style="font-size:smaller">' . $acat->description . '</em>';
+								$output .= '<br /><input type="checkbox" name="wCats[]" value="' . $acat->term_id . '"' . $checked . '> ' . $acat->name . ' <em style="font-size:smaller">' . $acat->description . '</em>';
 							}
 
 
@@ -969,16 +994,25 @@ class Splotwriter_Public {
 							<label for="wTags">' . $this->splotwriter_form_item_tags() . '</label>
 							<p>' . $this->splotwriter_form_item_tags_prompt() . '</p>
 				
-							<input type="text" name="wTags" id="wTags" class="writerfield" value="' .  $wTags .'" tabindex="8"  />
+							<input type="text" name="wTags" id="wTags" class="writerfield" value="' .  $wTags .'"   />
 						</fieldset>';
 
 					} // show_tags
 
-					$output .= '<fieldset id="theEmail">
-						<label for="wEmail">' . $this->splotwriter_form_item_email() . ' (optional)</label><br />
-						<p>' . $this->splotwriter_form_item_email_prompt() . '</p>
-						<input type="text" name="wEmail" id="wTitle" class="writerfield"  value="' .  $wEmail . '" autocomplete="on" tabindex="9" />
-					</fieldset>';
+
+					if (splotwriter_option('show_email') ) {
+						$output .= '<fieldset id="theEmail">
+							<label for="wEmail">' . $this->splotwriter_form_item_email() . ' (optional)</label><br />
+							<p>' . $this->splotwriter_form_item_email_prompt();
+							
+							if  ( !empty( splotwriter_option('email_domains') ) ) {
+								$output .= 'Allowable email addresses must be ones from domains <code>' . splotwriter_option('email_domains') . '</code>.';
+							}
+							
+							$output .= '</p>
+							<input type="text" name="wEmail" id="wTitle" class="writerfield"  value="' .  $wEmail . '" autocomplete="on"  />
+						</fieldset>';
+					}
 			
 
 					if ( $wNotes_required != -1 ) {
@@ -987,7 +1021,7 @@ class Splotwriter_Public {
 						$req_state = ( $wNotes_required == 1 ) ? 'required' : 'optional';
 					
 						$output .= '<label for="wNotes">' . $this->splotwriter_form_item_editor_notes() .  __(' (' . $req_state . ')' , 'splotwriter') .'</label>	<p><' . $this->splotwriter_form_item_editor_notes_prompt()  .'</p>
-							<textarea name="wNotes" class="writerfield" id="wNotes" rows="15"  tabindex="12">' .  stripslashes( $wNotes ) .'</textarea></fieldset>';
+							<textarea name="wNotes" class="writerfield" id="wNotes" rows="15">' .  stripslashes( $wNotes ) .'</textarea></fieldset>';
 			
 					} // wNotes required
 
@@ -1026,14 +1060,14 @@ class Splotwriter_Public {
 								$save_btn_txt = "Update and Publish";
 							} else {
 								$save_btn_txt = "Publish Now";
-								$output .= '<input type="submit" class="pretty-button pretty-button-green" value="Revise Draft" id="wSubDraft" name="wSubDraft" tabindex="10"> Save changes as draft and continue writing.<br /><br />';
+								$output .= '<input type="submit" class="pretty-button pretty-button-green" value="Revise Draft" id="wSubDraft" name="wSubDraft"> Save changes as draft and continue writing.<br /><br />';
 							}
 
-							$output .= '<input type="submit" class="pretty-button pretty-button-blue" value="' .  $save_btn_txt .'" id="wPublish" name="wPublish" tabindex="11"> All edits complete, publish to site.'; 
+							$output .= '<input type="submit" class="pretty-button pretty-button-blue" value="' .  $save_btn_txt .'" id="wPublish" name="wPublish"> All edits complete, publish to site.'; 
 				
 						} else {
 				
-							$output .= '<input type="submit" class="pretty-button pretty-button-green" value="Save Draft" id="makeit" name="makeit" tabindex="12"> Save your first draft, then preview.';
+							$output .= '<input type="submit" class="pretty-button pretty-button-green" value="Save Draft" id="wSubDraft" name="wSubDraft"> Save your first draft, then preview.';
 				
 						} // post_id
 				
@@ -2008,6 +2042,9 @@ class Splotwriter_Public {
 	}
 
 
+	public function is_email( $email ) {
+		return filter_var($email, FILTER_VALIDATE_EMAIL);
+	}
 
 	public function splotwriter_get_reading_time( $prefix_string, $suffix_string ) {
 		// return the estimated reading time only if the short code (aka plugin) exists. 
@@ -2039,6 +2076,24 @@ class Splotwriter_Public {
 		return ('<div class="notify"><span class="symbol icon-info"></span>
 	This is a preview of your entry that shows how it will look when published. <a href="#" onclick="self.close();return false;">Close this window/tab</a> when done to return to the writing form. Make any changes and click "Revise Draft" again or if it is ready, click "Publish Now".		
 					</div>');
+	}
+	
+	public function splotwriter_allowed_email_domain( $email ) {
+		// checks if an email address is within a list of allowed domains
+		
+		// extract domain h/t https://www.fraudlabspro.com/resources/tutorials/how-to-extract-domain-name-from-email-address/
+		$domain = substr($email, strpos($email, '@') + 1);
+		
+
+		$allowables = explode(",", splotwriter_option('email_domains'));
+		
+		foreach ( $allowables as $item) {
+			if ( $domain == trim($item)) return true;
+		}
+		
+		return false;
+	
+	
 	}
 
 	public function splot_the_author() {
