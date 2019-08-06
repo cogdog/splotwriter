@@ -607,8 +607,8 @@ class Splotwriter_Public {
 				// test for email only if enabled in options
 				if ( !empty( splotwriter_option('show_email') ) )  {
 				
-					// check first for valid email address
-					if ( is_email( $wEmail ) ) {
+					// check first for valid email address, blank is ok
+					if ( is_email( $wEmail ) OR empty($wEmail) ) {
 						// if email is good then check if we are limiting to domains
 						if ( !empty(splotwriter_option('email_domains'))  AND !$this->splotwriter_allowed_email_domain( $wEmail )  ) {
 							$errors[] = '<strong>Email Address Not Allowed</strong> - The email address you entered <code>' . $wEmail . '</code> is not from an domain accepted in this site. This site requests that  addresses are ones with domains <code>' .  splotwriter_option('email_domains') . '</code>. ';
@@ -616,7 +616,7 @@ class Splotwriter_Public {
 				
 					} else {
 						// bad email, sam.
-						$errors[] = '<strong>Invalid Email Address</strong> - the email address entered <code>' . $wEmail . '</code> is not a valid address. Pleae check and try again.';
+						$errors[] = '<strong>Invalid Email Address</strong> - the email address entered <code>' . $wEmail . '</code> is not a valid address. To skip entering an email address, make sure the field is empty. Pleae check and try again. ';
 					}
 				}
 				
@@ -2077,6 +2077,9 @@ class Splotwriter_Public {
 	
 	public function splotwriter_allowed_email_domain( $email ) {
 		// checks if an email address is within a list of allowed domains
+		
+		// allow for empty entries
+		if ( empty($email) ) return true;
 		
 		// extract domain h/t https://www.fraudlabspro.com/resources/tutorials/how-to-extract-domain-name-from-email-address/
 		$domain = substr($email, strpos($email, '@') + 1);
