@@ -1008,7 +1008,7 @@ class Splotwriter_Public {
 							<p>' . $this->splotwriter_form_item_email_prompt();
 							
 							if  ( !empty( splotwriter_option('email_domains') ) ) {
-								$output .= 'Allowable email addresses must be ones from domains <code>' . splotwriter_option('email_domains') . '</code>.';
+								$output .= ' Allowable email addresses must be ones from domains <code>' . splotwriter_option('email_domains') . '</code>.';
 							}
 							
 							$output .= '</p>
