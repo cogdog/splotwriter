@@ -10,9 +10,19 @@ This plugin provides all the functionality of the [TRU Writer SPLOT theme](http:
 
 ----- 
 
-At this point it's so beta there's no documentation here - the options and customizer docs for [TRU Writer  theme](http://github.com/cogdog/truwriter) apply here.
+## What is This?
+
+At this point this plugin is still being tested, so there's no documentation here -  but all of the the options and customizer docs for [TRU Writer  theme](http://github.com/cogdog/truwriter) apply here.
 
 On activation, the plugin *should* create two Pages in your site; one acts as the gatekeeper if you require an access code to write. The other Page hosts the form to compose new content. Any page can serve as the writing page as long as it contains a `[writerform]` shortcode to initiate the form. The SPLOT Writer option let's you select which page serves as the writing form.
+
+## With Thanks
+
+SPLOTs have no venture capital backers, no IPOs, no real funding at all. But they have been helped along by a few groups worth recognizing with an icon and a link.
+
+The original TRU Writer was developed under a [Thompson Rivers University Open Learning Fellowship](http://cogdog.trubox.ca/). The idea for and development of this plugin version was supported by Coventry University's [Disruptive Media Learning Lab](https://dmll.org.uk/) plus ongoing support by [Patreon patrons](https://patreon.com/cogdog).
+
+[![Thompson Rivers University](https://cogdog.github.io/images/tru.jpg)](https://tru.ca)  [![Disruptive Media Learning Lab](https://cogdog.github.io/images/dmll.jpg)](https://dmll.org.uk/)   [![Supporters on Patreon](https://cogdog.github.io/images/patreon.jpg)](https://patreon.com/cogdog) 
 
 
 ## See it in Action
