@@ -387,23 +387,30 @@ class Splotwriter_Public {
 
 	public function splotwriter_tinymce_buttons($buttons) {
 		//Remove the more button from editor
-		$remove = 'wp_more';
+		
+		if ( is_page( $this->splotwriter_get_write_page() ) ) {
+			$remove = 'wp_more';
 
-		// Find the array key and then unset
-		if ( ( $key = array_search($remove,$buttons) ) !== false )
-			unset($buttons[$key]);
+			// Find the array key and then unset
+			if ( ( $key = array_search($remove,$buttons) ) !== false )
+				unset($buttons[$key]);
+		}
 
 		return $buttons;
 	}
 
 	// remove row 2 buttons from the visual editor
-	public function splotwriter_tinymce_2_buttons($buttons)
-	 {
+	public function splotwriter_tinymce_2_buttons($buttons) {
 		//Remove the keybord shortcut and paste text buttons
-		$remove = array('wp_help','pastetext');
+		
+		if ( is_page( $this->splotwriter_get_write_page() ) ) {
+			$remove = array('wp_help','pastetext');
 
-		return array_diff($buttons,$remove);
-	 }
+			return array_diff($buttons,$remove);
+		 } else {
+		 	return $buttons;
+		 }
+	}
 
 # -----------------------------------------------------------------
 # Shortcode
@@ -805,13 +812,15 @@ class Splotwriter_Public {
 							if ( $wNotes ) $message .= '<br /><br />There are some extra notes from the author:<blockquote>' . $wNotes . '</blockquote>';
 				
 							// turn on HTML mail
-							add_filter( 'wp_mail_content_type', 'set_html_content_type' );
+							add_filter( 'wp_mail_content_type', array( &$this, 'set_html_content_type' ) );
+							
+							
 				
 							// mail it!
 							wp_mail( $to_recipients, $subject, $message);
 				
 							// Reset content-type to avoid conflicts -- http://core.trac.wordpress.org/ticket/23578
-							remove_filter( 'wp_mail_content_type', 'set_html_content_type' );				
+							remove_filter( 'wp_mail_content_type', array( &$this, 'set_html_content_type' ) );				
 																							
 						} else {
 							// updated but still in draft mode
@@ -1138,13 +1147,13 @@ class Splotwriter_Public {
 		}
 
 		// turn on HTML mail
-		add_filter( 'wp_mail_content_type', 'set_html_content_type' );
+		add_filter( 'wp_mail_content_type', array( &$this, 'set_html_content_type' ) );
 
 		// mail it!
 		$mail_sent = wp_mail( $to_recipient, $subject, $message );
 
 		// Reset content-type to avoid conflicts -- http://core.trac.wordpress.org/ticket/23578
-		remove_filter( 'wp_mail_content_type', 'set_html_content_type' );	
+		remove_filter( 'wp_mail_content_type', array( &$this, 'set_html_content_type' ) );	
 		
 		if ($mode == 'request') {
 			if 	($mail_sent) {
@@ -1252,7 +1261,7 @@ class Splotwriter_Public {
 	public function splotwriter_register_theme_customizer( $wp_customize ) {
 		// Create custom panel.
 		$wp_customize->add_panel( 'customize_writer', array(
-			'priority'       => 500,
+			'priority'       => 25,
 			'theme_supports' => '',
 			'title'          => __( 'SPLOT Writer', 'splotwriter'),
 			'description'    => __( 'Customize the Writer', 'splotwriter'),
@@ -2160,4 +2169,10 @@ class Splotwriter_Public {
 		$the_attachment = get_post( $post_id );
 		return ( $the_attachment->post_excerpt ); 
 	}	
+	
+	public function set_html_content_type() {
+	// from http://codex.wordpress.org/Function_Reference/wp_mail
+		return 'text/html';
+	}
+	
 }

@@ -153,7 +153,7 @@ class Splotwriter_Admin {
 	
 		// Create an edit link if it does not exist
 		if ( !$ekey ) {
-			splotwriter_make_edit_link( $post->ID );
+			$this->splotwriter_make_edit_link( $post->ID );
 			$ekey = get_post_meta( $post->ID, 'wEditKey', 1 );
 		}
 
@@ -162,5 +162,14 @@ class Splotwriter_Admin {
 		echo '</label> ';
 		echo '<input style="width:100%; type="text" id="writing_edit_link" name="writing_edit_link" value="' . get_bloginfo('url') . '/write/?wid=' . $post->ID . '&tk=' . $ekey  . '"  onclick="this.select();" />';
 	
-	}		
+	}
+	
+	public function splotwriter_make_edit_link( $post_id, $post_title='') {
+		// add a token for editing by using the post title as a trugger
+		// ----h/t via http://www.sitepoint.com/generating-one-time-use-urls/
+	
+		if ( $post_title == '')   $post_title = get_the_title($post_id );
+		update_post_meta( $post_id, 'wEditKey', sha1( uniqid( $post_title, true ) ) );
+	}
+		
 }
