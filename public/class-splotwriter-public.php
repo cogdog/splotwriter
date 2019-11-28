@@ -266,7 +266,7 @@ class Splotwriter_Public {
 			wp_set_auth_cookie( $autologin_user->ID);
 		
 			// do the login
-			do_action( 'wp_login', $autologin_user->user_login );
+			do_action( 'wp_login', $autologin_user->user_login, $autologin_user );
 		
 			// send 'em on their way
 			if ($redirect) wp_redirect( $this->splot_redirect_url() . $query_str  );
