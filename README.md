@@ -27,8 +27,9 @@ The original TRU Writer was developed under a [Thompson Rivers University Open L
 
 ## See it in Action
 
-* https://splots.coventry.domains/pluggedin/
-* https://lab.cogdogblog.com/splotwriter/
+* Conestoga College Teaching and Learning ([Coldbox Theme](https://wordpress.org/themes/coldbox/)) - see the [Teaching Stories](https://tlconestoga.ca/category/stories/) submitted via the [Share a Story page](https://tlconestoga.ca/write/)
+* Coventry Demo ([Hitchcock theme](https://wordpress.org/themes/hitchcock/)) https://splots.coventry.domains/pluggedin/
+* SPLOPT Demo ([Miyazaki theme](https://wordpress.org/themes/miyazaki/)) https://lab.cogdogblog.com/splotwriter/
 
 
 ## Installation
